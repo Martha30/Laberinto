@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    </head>
+    <body>
+        <div id="root"></div>
+        
+        <script type="text/babel">
+            const htmlRoot = document.getElementById('root')
+        
+            const Wall = () => {
+              const style = {
+                width: '10px',
+                height: '10px',
+                backgroundColor: 'blue'
+              }
+              return <div style={style} />
+            }
+
+            const Goal = () => {
+              const style = {
+                width: '10px',
+                height: '10px',
+                backgroundColor: 'yellow'
+              }
+              return <div style={style} />
+            }
+
+            const Player = () => {
+              const style = {
+                width: '10px',
+                height: '10px',
+                backgroundColor: 'red'
+              }
+              return <div style={style} />
+            }
+
+            const Empty = () => {
+              const style = {
+                width: '10px',
+                height: '10px',
+                backgroundColor: 'white'
+              }
+              return <div style={style} />
+            }
+
+
+            const Maze = () => {
+              const [mazeData, setMazeData] = React.useState([])
+              const [playerPosition, setPlayerPosition] = React.useState({x: 1, y:1})
+              const rowStyles = {
+                display: 'flex'
+              }
+
+
+              React.useEffect(() => {
+                fetch('http://ubeje.xyz:3001/?type=json&w=10&h=10')
+                  .then(r => r.json())
+                  .then(r => setMazeData(r))
+                  return () => {
+                    document.removeEventListener('keydown', onKeyDown);
+                }
+              }, [])
+
+            
+              const handleKeyDown = ({key}) =>{
+                if(key === "ArrowUp"){
+                  if(playerPosition.x > 0 && playerPosition.y > 0){
+                    if(mazeData[playerPosition.x - 1][playerPosition.y] === ' '){
+                      mazeData[playerPosition.x -1][playerPosition.y] = 'p'
+                      mazeData[playerPosition.x][playerPosition.y] = ' '
+                      setPlayerPosition({x: playerPosition.x -1, y: playerPosition.y});
+                    }
+                  }
+                }
+                else if( key === "ArrowDown"){
+                  if(mazeData[playerPosition.x + 1][playerPosition.y] === ' '){
+                    mazeData[playerPosition.x + 1][playerPosition.y] = 'p'
+                    mazeData[playerPosition.x][playerPosition.y] = ' '
+                    setPlayerPosition({x: playerPosition.x + 1, y: playerPosition.y});
+                  }
+                  if(mazeData[playerPosition.x + 1][playerPosition.y] === 'g'){
+                    alert('¡¡¡FELICIDADES HAS GANADO!!!');  
+                  }
+                }
+
+                else if( key === "ArrowLeft"){
+                  if(mazeData[playerPosition.x][playerPosition.y -1] === ' '){
+                    mazeData[playerPosition.x][playerPosition.y -1] = 'p'
+                    mazeData[playerPosition.x][playerPosition.y] = ' '
+                    setPlayerPosition({x: playerPosition.x, y: playerPosition.y -1});
+                  }
+
+                  if(mazeData[playerPosition.x][playerPosition.y - 1] === 'g'){
+                    alert('¡¡¡FELICIDADES HAS GANADO!!!');  
+                  }
+                }
+
+                else if( key === "ArrowRight"){
+                  if(mazeData[playerPosition.x][playerPosition.y + 1] === ' '){
+                    mazeData[playerPosition.x][playerPosition.y + 1] = 'p'
+                    mazeData[playerPosition.x][playerPosition.y] = ' '
+                    setPlayerPosition({x: playerPosition.x, y: playerPosition.y + 1});
+                  }
+
+                   if(mazeData[playerPosition.x][playerPosition.y + 1] === 'g'){
+                    alert('¡¡¡FELICIDADES HAS GANADO!!!');  
+                  }
+                }
+              }
+
+              return (
+                <div tabIndex="1" onKeyDown={handleKeyDown}>
+                  {mazeData.map((row) => {
+                    return (
+                      <div style={rowStyles}>
+                        {row.map((cell) => {
+                          switch(cell) {
+                            case 'p':
+                              return <Player />
+                            case 'g':
+                              return <Goal />
+                            case ' ':
+                              return <Empty />
+                            default:
+                              return <Wall />
+                          }
+                        })}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            }
+
+            ReactDOM.render(
+                <Maze />,
+                htmlRoot
+            ) 
+        </script>
+    </body>
+</html>
